@@ -1,0 +1,5 @@
+1. Create a library called RB3.
+2. Create the files by compiling SHP0100P, SHP0101P, and SHP0102P in library RB3.
+3. Create the program by compiling SHP0100R in library RB3. Note this is an SQLRPGLE program. 
+4. Run the SQL Scripts for SHP0100P and SHP0101P. 
+5. Call the program from the command line. No parameters are required. 
