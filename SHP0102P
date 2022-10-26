@@ -1,0 +1,23 @@
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*     
+ *        Name: SHP0102P                                               
+ * Description: Used to assign shipment destinations to a given driver.
+ *      Author: Riley Baptiste III                                     
+ *     Project: Shipment Destination                                   
+ *   Requester: Platform Science                                       
+ *     Written: 10/24/2022                                             
+ *                                                                     
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+ *           PLATFORM SCIENCE MODIFICATION LOG                         
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+ * TAG DATE   PROGRAMMER   DESCRIPTION                                 
+ * --- ------ ------------ --------------------------------------------
+ *                                                                     
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+A          R SHP0102PR                                                 
+A            XDRIV         20A         COLHDG('Drivers')               
+A            XADDR         50A         COLHDG('Shipment Address')      
+A            XSCR          10  3       COLHDG('Suitability +           
+A                                              Score')      
+ *                                                          
+A          K XDRIV                                          
+A          K XADDR                                          
