@@ -3,3 +3,4 @@
 3. Create the program by compiling SHP0100R in library RB3. Note this is an SQLRPGLE program. 
 4. Run the SQL Scripts for SHP0100P and SHP0101P. 
 5. Call the program from the command line. No parameters are required. 
+6. The results will be in file SHP0102P.
