@@ -1,0 +1,19 @@
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*     
+ *        Name: SHP0101P                                               
+ * Description: Used to assign shipment destinations to a given driver.
+ *      Author: Riley Baptiste III                                     
+ *     Project: Shipment Destination                                   
+ *   Requester: Platform Science                                       
+ *     Written: 10/24/2022                                             
+ *                                                                     
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+ *           PLATFORM SCIENCE MODIFICATION LOG                         
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+ * TAG DATE   PROGRAMMER   DESCRIPTION                                 
+ * --- ------ ------------ --------------------------------------------
+ *                                                                     
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+A          R SHP0101PR                                                 
+A            DRIV          20A         COLHDG('Drivers')               
+ *                                                                     
+A          K DRIV                                                      
