@@ -1,0 +1,13 @@
+delete from rb3.shp0100p;
+insert into rb3.shp0100p values ('555 Brockton Avenue, Abington MA 2351');             
+insert into rb3.shp0100p values ('30 Memorial Drive, Avon MA 2322');         
+insert into rb3.shp0100p values ('250 Hartford Avenue, Bellingham MA 2019');         
+insert into rb3.shp0100p values ('700 Oak Street, Brockton MA 2301');         
+insert into rb3.shp0100p values ('66-4 Parkhurst Rd, Chelmsford MA 1824');         
+insert into rb3.shp0100p values ('591 Memorial Dr, Chicopee MA 1020');         
+insert into rb3.shp0100p values ('55 Brooksby Village Way, Danvers MA 1923');         
+insert into rb3.shp0100p values ('137 Teaticket Hwy, East Falmouth MA 2536');         
+insert into rb3.shp0100p values ('42 Fairhaven Commons Way, Fairhaven MA 2719');         
+insert into rb3.shp0100p values ('374 William S Canning Blvd, Fall River MA 2721');         
+select * from rb3.shp0100p;
+	
