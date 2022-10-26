@@ -1,0 +1,317 @@
+H Option (*Nodebugio:*Srcstmt) DftActGrp(*No)                           
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*      
+ *        Name: SHP0100R                                                
+ * Description: Used to assign shipment destinations to a given driver. 
+ *      Author: Riley Baptiste III                                      
+ *     Project: Shipment Destination                                    
+ *   Requester: Platform Science                                        
+ *     Written: 10/24/2022                                              
+ *                                                                      
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
+ *        PLATFORM SCIENCE Modification Log                             
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
+ * Tag Date   Programmer   Description                                  
+ * --- ------ ------------ -------------------------------------------- 
+ *                                                                      
+ *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
+FSHP0100P  IF   E           K DISK                                      
+FSHP0101P  IF   E           K DISK                                      
+FSHP0102P  O    E           K DISK               
+                                                               
+                                                               
+D SHP0100R        PR                  extPGM('SHP0100R')       
+ *                                                             
+D SHP0100R        PI                                           
+                                                               
+ *------------------------------------------------------------ 
+ * Standalone...                                               
+ *------------------------------------------------------------ 
+D sAddress        S             50a                            
+D dName           S             20A                            
+D wBaseSuitabilityScore1...                                    
+D                 S             10  3 Inz(0)                   
+D wBaseSuitabilityScore2...                                    
+D                 S             10  3 Inz(0)                   
+D wBaseSuitabilityScore3...                                    
+D                 S             10  3 Inz(0)                   
+D wBaseSuitabilityScoreTotal...                                
+D                 S             10  3 Inz(0)      
+D i               S              5  0 Inz(1)                      
+D j               S              5  0 Inz(1)                      
+D lastElem        S              5  0 Inz(0)                      
+D upper           c                   'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+D lower           c                   'abcdefghijklmnopqrstuvwxyz'
+D arryVowels      S              1    DIM(5) PERRCD(1) CTDATA     
+d addressInUse    S             50A   DIM(50)                     
+D suitability     DS                  Qualified DIM(50)           
+D  addr                         50A                               
+D  drive                        20A                               
+D  scr                          10  3                             
+ *------------------------------------------------------------    
+ * ProtoTypes...                                                  
+ *------------------------------------------------------------    
+DevenDestination  PR            10  3                             
+D  address                      50A   Const Options(*Varsize)     
+D  name                         20A   Const Options(*Varsize)     
+                                                                  
+DoddDestination   PR            10  3              
+D  address                      50A   Const Options(*Varsize)
+D  name                         20A   Const Options(*Varsize)
+                                                             
+DcommonDestination...                                        
+D                 PR            10  3                        
+D  address                      50A   Const Options(*Varsize)
+D  name                         20A   Const Options(*Varsize)
+                                                             
+DnumberOfVowels   PR             5  0                        
+D  name                         20A   Const Options(*Varsize)
+                                                             
+DisVowel          PR              N                          
+D  letter                        1A   Const Options(*Varsize)
+                                                             
+DnumberOfConsonants...                                       
+D                 PR             5  0                        
+D  name                         20A   Const Options(*Varsize)
+                                                             
+DisConsonants     PR              N                       
+D  letter                        1A   Const Options(*Varsize)     
+ /Free                                                            
+  //**************************************************************
+  // $Main                                                        
+  //**************************************************************
+   Exec Sql Delete From Shp0102p;                                 
+                                                                  
+   // For Each driver compare the address...                      
+   Setll *loval Shp0101p;                                         
+   DoU %Eof (Shp0101p);                                           
+    Read Shp0101p;                                                
+    If Not %Eof (Shp0101p);                                       
+     Setll *loval Shp0100p;                                       
+     DoU %Eof (Shp0100p);                                         
+      Read Shp0100p;                                              
+      If Not %Eof(Shp0100p);                                      
+        // Convert from lower to upper case....                   
+        sAddress = %Xlate(lower:upper:ADDR);                      
+        dName    = %Xlate(lower:upper:DRIV);                  
+                wBaseSuitabilityScore1 = evenDestination(sAddress:dName);  
+                                                                   
+        wBaseSuitabilityScore2 = oddDestination(sAddress:dName);   
+                                                                   
+        wBaseSuitabilityScore3 = commonDestination(sAddress:dName);
+                                                                   
+        wBaseSuitabilityScoreTotal = wBaseSuitabilityScore1 +      
+                                     wBaseSuitabilityScore2 +      
+                                     wBaseSuitabilityScore3;       
+                                                                   
+        // Update file w/ SS score;                                
+        suitability(i).addr  = sAddress;                           
+        suitability(i).drive = dName;            
+                suitability(i).scr   = wBaseSuitabilityScoreTotal;       
+                                                                 
+        i+=1;                                                    
+                                                                 
+        Reset wBaseSuitabilityScore1;                            
+        Reset wBaseSuitabilityScore2;                            
+        Reset wBaseSuitabilityScore3;                            
+        Reset wBaseSuitabilityScoreTotal;                        
+      EndIf;                                                     
+     EndDo;                                                      
+     // Determine the highest SS score.                          
+     lastElem = %lookup(' ':suitability(*).addr) - 1;            
+     SORTA %subarr(suitability(*).scr:1:lastElem);               
+                                                                 
+     // If the address is taken choose a different address...    
+     DoU (%lookup(suitability(lastElem).addr:addressInUse) = 0); 
+      If (%lookup(suitability(lastElem).addr:addressInUse) > 0); 
+       lastElem-=1;                                              
+      EndIf;                              
+           EndDo;                                       
+                                                  
+     // Write record...                           
+     XADDR = suitability(lastElem).addr;          
+     XDRIV = suitability(lastElem).drive;         
+     XSCR  = suitability(lastElem).scr;           
+     Write SHP0102PR;                             
+                                                  
+     // Store the address...                      
+     addressInUse(j) = suitability(lastElem).addr;
+     j+=1;                                        
+                                                  
+     // Reset fields                              
+     Clear suitability;                           
+     Reset i;                                     
+     Reset lastElem;                              
+    EndIf;                                        
+   EndDo;                   
+                                                                 
+   // Sort the Array by score and write the record            
+                                                              
+   *Inlr = '1';                                               
+ *------------------------------------------------------------
+ * EvenDestination                                            
+ *------------------------------------------------------------
+PevenDestination  B                                           
+DevenDestination  PI            10  3                         
+D  address                      50A   Const Options(*Varsize) 
+D  name                         20A   Const Options(*Varsize) 
+                                                              
+D score           S             10  3 Inz(0)                  
+                                                              
+ /Free                                                        
+  If (%Rem(%len(%Trim(address)):2)  = 0);                     
+   score = numberOfVowels(name) * 1.5;                        
+  EndIf;                             
+                                                                
+  Return score;                                               
+ /End-Free                                                    
+PevenDestination  E                                           
+ *------------------------------------------------------------
+ * OddDestination                                             
+ *------------------------------------------------------------
+PoddDestination   B                                           
+DoddDestination   PI            10  3                         
+D  address                      50A   Const Options(*Varsize) 
+D  name                         20A   Const Options(*Varsize) 
+                                                              
+D score           S             10  3 Inz(0)                  
+                                                              
+ /Free                                                        
+  If (%Rem(%len(%Trim(address)):2)  <> 0);                    
+   score = numberOfConsonants(name) * 1;                      
+  EndIf;                                      
+                                                               
+  Return score;                                              
+ /End-Free                                                   
+PoddDestination   E                                          
+ *-----------------------------------------------------------
+ * CommonDestination                                         
+ *-----------------------------------------------------------
+PcommonDestination...                                        
+P                 B                                          
+DcommonDestination...                                        
+D                 PI            10  3                        
+D  address                      50A   Const Options(*Varsize)
+D  name                         20A   Const Options(*Varsize)
+                                                             
+D score           S             10  3 Inz(0)                 
+D scrConName      S              5  0 Inz(0)                 
+D scrVowName      S              5  0 Inz(0)                 
+D scrConAddress   S              5  0 Inz(0)                 
+D scrVowAddress   S              5  0 Inz(0)          
+                                                                      
+ /Free                                                                
+   scrConName = numberOfConsonants(name);                             
+   scrVowName = numberOfVowels(name);                                 
+                                                                      
+   scrConAddress = numberOfConsonants(address);                       
+   scrVowAddress = numberOfVowels(address);                           
+                                                                      
+   If ((scrConName < scrConAddress) And (scrVowName > scrVowAddress));
+    score = scrConName + scrVowName + scrConAddress + scrVowAddress;  
+    score *= 1.5;                                                     
+   EndIf;                                                             
+                                                                      
+  Return score;                                                       
+ /End-Free                                                            
+PcommonDestination...                                                 
+P                 E                                                   
+ *------------------------------------------------------------        
+ * NumberOfVowels                            
+  *------------------------------------------------------------
+PnumberOfVowels   B                                           
+DnumberOfVowels   PI             5  0                         
+D  name                         20A   Const Options(*Varsize) 
+                                                              
+D vowels          S             10  3 Inz(0)                  
+D i               S              5  0 Inz(1)                  
+D count           S              5  0 Inz(1)                  
+D nameArry        S              1a   Dim(50)                 
+                                                              
+ /Free                                                        
+  // Load Array                                               
+  For i=1 to %len(name);                                      
+   nameArry(i) = %Subst(name:i:1);                            
+  EndFor;                                                     
+                                                              
+  // Count Number of Vowels                                   
+  For i=1 to %elem(nameArry);                                 
+   If isVowel(nameArry(i));                    
+       vowels+=1;                                                
+   EndIf;                                                     
+  EndFor;                                                     
+                                                              
+  Return vowels;                                              
+ /End-Free                                                    
+PnumberOfVowels   E                                           
+ *------------------------------------------------------------
+ * isVowel                                                    
+ *------------------------------------------------------------
+PisVowel          B                                           
+DisVowel          PI              N                           
+D  letter                        1A   Const Options(*Varsize) 
+                                                              
+DvowelStatus      S               N   Inz(*Off)               
+                                                              
+ /Free                                                        
+  If (%lookup(letter:arryVowels) > 0);                        
+   vowelStatus = '1';           
+     EndIf;                                                      
+                                                              
+  Return vowelStatus;                                         
+ /End-Free                                                    
+PisVowel          E                                           
+ *------------------------------------------------------------
+ * NumberOfConsonants                                         
+ *------------------------------------------------------------
+PnumberOfConsonants...                                        
+P                 B                                           
+DnumberOfConsonants...                                        
+D                 PI             5  0                         
+D  name                         20A   Const Options(*Varsize) 
+                                                              
+D consonants      S              5  0 Inz(0)                  
+D i               S              5  0 Inz(1)                  
+D count           S              5  0 Inz(1)                  
+D nameArry        S              1a   Dim(50)                 
+ /Free                       
+   // Load Array                                               
+  For i=1 to %len(name);                                      
+   nameArry(i) = %Subst(name:i:1);                            
+  EndFor;                                                     
+                                                              
+  // Count Number of Vowels                                   
+  For i=1 to %elem(nameArry);                                 
+   If isConsonants(nameArry(i));                              
+    consonants+=1;                                            
+   EndIf;                                                     
+  EndFor;                                                     
+                                                              
+  Return consonants;                                          
+ /End-Free                                                    
+PnumberOfConsonants...                                        
+P                 E                                           
+                                                              
+ *------------------------------------------------------------
+ * isConsonants             
+  *------------------------------------------------------------
+PisConsonants     B                                           
+DisConsonants     PI              N                           
+D  letter                        1A   Const Options(*Varsize) 
+                                                              
+DconsonantsStatus...                                          
+D                 S               N   Inz(*Off)               
+ /Free                                                        
+                                                              
+  If (%lookup(letter:arryVowels) = 0 And letter <> ' ');      
+   consonantsStatus = '1';                                    
+  EndIf;                                                      
+                                                              
+  Return consonantsStatus;                                    
+ /End-Free                                                    
+PisConsonants     E         
+**CTDATA arryVowels   
+A                     
+E                     
+I                     
+O                     
+U                     
