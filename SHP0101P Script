@@ -1,0 +1,12 @@
+delete from rb3.shp0101p;
+insert into rb3.shp0101p values ('Larry Walker');             
+insert into rb3.shp0101p values ('Luke Simmons');         
+insert into rb3.shp0101p values ('Robbie Thompson');         
+insert into rb3.shp0101p values ('James Earl Jones');         
+insert into rb3.shp0101p values ('Ronald Jackson');         
+insert into rb3.shp0101p values ('Barry Bonds');         
+insert into rb3.shp0101p values ('Carlos Correa');         
+insert into rb3.shp0101p values ('Jackie Robinson');         
+insert into rb3.shp0101p values ('Johnny Rodriguez');         
+insert into rb3.shp0101p values ('Michael Thomas');         
+select * from rb3.shp0101p;
